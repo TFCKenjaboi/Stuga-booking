@@ -3,66 +3,153 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boka Stugan</title>
+<title>Oliver Holmstrand Enterprisen — Boka Stugan</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: system-ui, -apple-system, sans-serif;
-    background: #f4f1ec;
-    color: #2b2b2b;
-    margin: 0;
-    padding: 20px;
+  :root {
+    --pine: #1c2b22;
+    --pine-deep: #121c16;
+    --birch: #f7f3ea;
+    --birch-dim: #efe9db;
+    --amber: #c17f3f;
+    --amber-deep: #a5652b;
+    --fog: #8a9a90;
+    --ink: #2a2f2a;
+    --line: rgba(28, 43, 34, 0.12);
+    --danger: #a54a3d;
+    --danger-deep: #8a3a30;
   }
-  .container {
-    max-width: 480px;
+
+  * { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--birch);
+    color: var(--ink);
+    margin: 0;
+    padding: 0 20px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 520px;
     margin: 0 auto;
   }
-  h1 {
-    font-size: 1.6rem;
-    margin-bottom: 4px;
+
+  /* ---------- HERO ---------- */
+  .hero {
+    padding: 48px 0 28px;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .hero-mark {
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+    margin: 0 auto 18px;
+    display: block;
+    color: var(--pine);
+    opacity: 0.85;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--amber-deep);
+    margin: 0 0 10px;
+  }
+
+  h1#pageTitle {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(1.7rem, 5.5vw, 2.35rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 14px;
+    color: var(--pine-deep);
     user-select: none;
     -webkit-user-select: none;
+    cursor: default;
   }
+
   p.subtitle {
-    color: #666;
-    margin-top: 0;
-    margin-bottom: 24px;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--ink);
+    opacity: 0.8;
+    margin: 0 auto;
+    max-width: 380px;
   }
-  .calendar {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    transition: box-shadow 0.2s ease;
+
+  .location-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--pine);
+    background: var(--birch-dim);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 100px;
   }
+  .location-tag svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  /* ---------- CARD (shared) ---------- */
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(28,43,34,0.04), 0 8px 24px rgba(28,43,34,0.06);
+    border: 1px solid var(--line);
+  }
+
+  .calendar { margin-top: 8px; }
+
   .cal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
   .cal-header button {
-    width: auto;
-    padding: 6px 12px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
     margin: 0;
-    background: #3a6351;
-    color: white;
+    background: var(--pine);
+    color: var(--birch);
     border: none;
-    border-radius: 8px;
+    border-radius: 9px;
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease;
   }
-  .cal-header button:active {
-    transform: scale(0.94);
-    background: #2e4f40;
-  }
+  .cal-header button:hover { background: var(--pine-deep); }
+  .cal-header button:active { transform: scale(0.92); }
   .cal-header span {
-    font-weight: 600;
-    font-size: 1rem;
-    transition: opacity 0.15s ease;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: var(--pine-deep);
   }
+
   .cal-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -70,142 +157,158 @@
     text-align: center;
   }
   .cal-daylabel {
-    font-size: 0.7rem;
-    color: #888;
-    font-weight: 600;
-    padding: 4px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--fog);
+    font-weight: 500;
+    padding: 6px 0 10px;
   }
   .cal-day {
-    padding: 8px 0;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    padding: 9px 0;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
     cursor: pointer;
     user-select: none;
     transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
   }
   .cal-day.empty { cursor: default; }
-  .cal-day.past { color: #ccc; cursor: default; }
-  .cal-day.available { background: #e6f2e9; color: #2e7d32; }
-  .cal-day.available:hover { background: #d4ebda; }
+  .cal-day.past { color: #d4cfc2; cursor: default; }
+  .cal-day.available { background: var(--birch-dim); color: #3d5240; }
+  .cal-day.available:hover { background: #e5decc; }
   .cal-day.available:active { transform: scale(0.92); }
-  .cal-day.booked { background: #fbe1e1; color: #a52424; cursor: not-allowed; }
-  .cal-day.selected { background: #3a6351; color: white; font-weight: 600; }
-  .cal-day.selected:hover { background: #3a6351; }
+  .cal-day.booked {
+    background: rgba(165, 74, 61, 0.09);
+    color: var(--danger);
+    cursor: not-allowed;
+  }
+  .cal-day.selected { background: var(--amber); color: #fff; font-weight: 500; }
+  .cal-day.selected:hover { background: var(--amber); }
+
   .legend {
     display: flex;
-    gap: 14px;
-    margin-top: 12px;
-    font-size: 0.75rem;
+    gap: 16px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink);
+    opacity: 0.75;
     flex-wrap: wrap;
   }
-  .legend span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  .dot.available { background: #6bbf8b; }
-  .dot.booked { background: #d16a6a; }
-  .dot.selected { background: #3a6351; }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot.available { background: #6f8f76; }
+  .dot.booked { background: var(--danger); }
+  .dot.selected { background: var(--amber); }
 
   #selectionSummary {
-    margin-top: 14px;
-    font-size: 0.9rem;
+    margin-top: 16px;
+    font-size: 0.85rem;
     text-align: center;
-    color: #444;
-    transition: opacity 0.2s ease;
+    color: var(--pine-deep);
+    font-weight: 500;
   }
 
+  /* ---------- FORM ---------- */
   form {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
     margin-top: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 22px 20px;
   }
   label {
     display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-top: 14px;
-    margin-bottom: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--fog);
+    margin-top: 16px;
+    margin-bottom: 6px;
   }
+  label:first-of-type { margin-top: 0; }
   input {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    background: var(--birch);
+    border-radius: 9px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   input:focus {
     outline: none;
-    border-color: #3a6351;
-    box-shadow: 0 0 0 3px rgba(58,99,81,0.15);
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(193,127,63,0.15);
   }
   button[type="submit"] {
     width: 100%;
-    margin-top: 20px;
-    padding: 12px;
-    background: #3a6351;
-    color: white;
+    margin-top: 22px;
+    padding: 13px;
+    background: var(--pine);
+    color: var(--birch);
     border: none;
-    border-radius: 8px;
-    font-size: 1rem;
+    border-radius: 9px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
   }
-  button[type="submit"]:active:not(:disabled) {
-    transform: scale(0.98);
-  }
-  button:disabled {
-    background: #bbb;
-    cursor: not-allowed;
-  }
+  button[type="submit"]:hover:not(:disabled) { background: var(--pine-deep); }
+  button[type="submit"]:active:not(:disabled) { transform: scale(0.98); }
+  button:disabled { background: #cfc9ba; color: #8a8574; cursor: not-allowed; }
+
   #statusMsg {
     margin-top: 14px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     text-align: center;
     min-height: 1.2em;
-    transition: opacity 0.2s ease;
+    color: var(--pine-deep);
   }
 
-  .container {
-    animation: fadeIn 0.35s ease;
-  }
+  .wrap { animation: fadeIn 0.4s ease; }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
+  footer.sign {
+    text-align: center;
+    margin-top: 36px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    color: var(--fog);
+    text-transform: uppercase;
+  }
+
+  /* ---------- ADMIN ---------- */
   #adminOverlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.45);
+    background: rgba(18, 28, 22, 0.55);
     align-items: flex-end;
     justify-content: center;
     z-index: 1000;
     animation: fadeIn 0.2s ease;
   }
-  #adminOverlay.open {
-    display: flex;
-  }
+  #adminOverlay.open { display: flex; }
   #adminPanel {
-    background: #fff;
+    background: var(--birch);
     width: 100%;
     max-width: 480px;
     max-height: 82vh;
     overflow-y: auto;
-    border-radius: 16px 16px 0 0;
-    padding: 18px;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+    border-radius: 18px 18px 0 0;
+    padding: 20px;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.25);
     animation: slideUp 0.25s ease;
   }
   @keyframes slideUp {
@@ -216,11 +319,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
   }
   .admin-header h2 {
-    font-size: 1.1rem;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 1.15rem;
     margin: 0;
+    color: var(--pine-deep);
   }
   #adminCloseBtn {
     background: none;
@@ -228,7 +336,7 @@
     font-size: 1.3rem;
     line-height: 1;
     cursor: pointer;
-    color: #888;
+    color: var(--fog);
     padding: 4px 8px;
   }
   .admin-booking {
@@ -236,54 +344,68 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
   }
   .admin-booking:last-child { border-bottom: none; }
   .admin-booking-info {
     font-size: 0.85rem;
-    line-height: 1.4;
+    line-height: 1.5;
   }
   .admin-booking-info strong {
     display: block;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
+    color: var(--pine-deep);
   }
   .admin-delete-btn {
-    background: #c94f4f;
+    background: var(--danger);
     color: white;
     border: none;
     border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 0.8rem;
+    padding: 9px 13px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
     cursor: pointer;
     flex-shrink: 0;
     transition: background 0.15s ease, transform 0.1s ease;
   }
-  .admin-delete-btn:active {
-    transform: scale(0.94);
-    background: #a53d3d;
-  }
+  .admin-delete-btn:hover { background: var(--danger-deep); }
+  .admin-delete-btn:active { transform: scale(0.94); }
   #adminEmpty {
-    color: #888;
+    color: var(--fog);
     font-size: 0.9rem;
     text-align: center;
-    padding: 20px 0;
+    padding: 24px 0;
   }
   #adminStatusMsg {
     font-size: 0.85rem;
     text-align: center;
-    margin-top: 8px;
+    margin-top: 10px;
     min-height: 1.2em;
+    color: var(--pine-deep);
   }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1 id="pageTitle">Boka Stugan</h1>
-  <p class="subtitle">Välj incheckning och utcheckning i kalendern</p>
+<div class="wrap">
 
-  <div class="calendar">
+  <div class="hero">
+    <svg class="hero-mark" viewBox="0 0 360 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M0 78 L28 78 L36 58 L44 78 L58 78 L68 48 L78 78 L96 78 L108 40 L120 78 L140 78 L150 55 L160 78 L182 78 L194 30 L206 78 L226 78 L236 50 L246 78 L266 78 L278 44 L290 78 L312 78 L322 60 L332 78 L360 78" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" opacity="0.55"/>
+      <line x1="0" y1="79" x2="360" y2="79" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+    </svg>
+    <p class="eyebrow">Est. i granskogen</p>
+    <h1 id="pageTitle">Oliver Holmstrand Enterprisen</h1>
+    <p class="subtitle">En liten stuga vid skogsbrynet utanför Harads — tyst, mörk och nära Lule älv. Hit kommer man för norrsken, tystnad och avstånd till allt annat.</p>
+    <span class="location-tag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      Harads, Norrbotten
+    </span>
+  </div>
+
+  <div class="calendar card">
     <div class="cal-header">
       <button id="prevMonth" type="button">←</button>
       <span id="calMonthLabel"></span>
@@ -298,22 +420,24 @@
     <div id="selectionSummary">Tryck på ett datum för incheckning</div>
   </div>
 
-  <form id="bookingForm">
+  <form id="bookingForm" class="card">
     <label for="name">Namn</label>
     <input type="text" id="name" required>
 
     <label for="email">E-post</label>
     <input type="email" id="email" required>
 
-    <button type="submit" id="submitBtn" disabled>Boka</button>
+    <button type="submit" id="submitBtn" disabled>Boka stugan</button>
     <div id="statusMsg"></div>
   </form>
+
+  <footer class="sign">Oliver Holmstrand Enterprisen · Harads</footer>
 </div>
 
 <div id="adminOverlay">
   <div id="adminPanel">
     <div class="admin-header">
-      <h2>Admin – Bokningar</h2>
+      <h2>Admin — Bokningar</h2>
       <button id="adminCloseBtn" type="button">✕</button>
     </div>
     <div id="adminList"></div>

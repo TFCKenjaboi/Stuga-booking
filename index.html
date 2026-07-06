@@ -5,11 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Boka Stugan</title>
 
-<!-- TEMPORARY DEBUG CONSOLE - tap the floating circle button to see real errors -->
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
-
 <style>
+  * { box-sizing: border-box; }
   body {
     font-family: system-ui, -apple-system, sans-serif;
     background: #f4f1ec;
@@ -24,6 +21,8 @@
   h1 {
     font-size: 1.6rem;
     margin-bottom: 4px;
+    user-select: none;
+    -webkit-user-select: none;
   }
   p.subtitle {
     color: #666;
@@ -35,6 +34,7 @@
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: box-shadow 0.2s ease;
   }
   .cal-header {
     display: flex;
@@ -52,10 +52,16 @@
     border-radius: 8px;
     font-size: 1rem;
     cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .cal-header button:active {
+    transform: scale(0.94);
+    background: #2e4f40;
   }
   .cal-header span {
     font-weight: 600;
     font-size: 1rem;
+    transition: opacity 0.15s ease;
   }
   .cal-grid {
     display: grid;
@@ -75,12 +81,16 @@
     font-size: 0.85rem;
     cursor: pointer;
     user-select: none;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
   }
   .cal-day.empty { cursor: default; }
   .cal-day.past { color: #ccc; cursor: default; }
   .cal-day.available { background: #e6f2e9; color: #2e7d32; }
+  .cal-day.available:hover { background: #d4ebda; }
+  .cal-day.available:active { transform: scale(0.92); }
   .cal-day.booked { background: #fbe1e1; color: #a52424; cursor: not-allowed; }
   .cal-day.selected { background: #3a6351; color: white; font-weight: 600; }
+  .cal-day.selected:hover { background: #3a6351; }
   .legend {
     display: flex;
     gap: 14px;
@@ -108,6 +118,7 @@
     font-size: 0.9rem;
     text-align: center;
     color: #444;
+    transition: opacity 0.2s ease;
   }
 
   form {
@@ -130,7 +141,12 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 1rem;
-    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:focus {
+    outline: none;
+    border-color: #3a6351;
+    box-shadow: 0 0 0 3px rgba(58,99,81,0.15);
   }
   button[type="submit"] {
     width: 100%;
@@ -143,22 +159,128 @@
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+  }
+  button[type="submit"]:active:not(:disabled) {
+    transform: scale(0.98);
   }
   button:disabled {
-    background: #999;
+    background: #bbb;
     cursor: not-allowed;
   }
   #statusMsg {
     margin-top: 14px;
     font-size: 0.9rem;
     text-align: center;
+    min-height: 1.2em;
+    transition: opacity 0.2s ease;
+  }
+
+  .container {
+    animation: fadeIn 0.35s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #adminOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+  }
+  #adminOverlay.open {
+    display: flex;
+  }
+  #adminPanel {
+    background: #fff;
+    width: 100%;
+    max-width: 480px;
+    max-height: 82vh;
+    overflow-y: auto;
+    border-radius: 16px 16px 0 0;
+    padding: 18px;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0.6; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .admin-header h2 {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  #adminCloseBtn {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #888;
+    padding: 4px 8px;
+  }
+  .admin-booking {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .admin-booking:last-child { border-bottom: none; }
+  .admin-booking-info {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .admin-booking-info strong {
+    display: block;
+    font-size: 0.9rem;
+  }
+  .admin-delete-btn {
+    background: #c94f4f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .admin-delete-btn:active {
+    transform: scale(0.94);
+    background: #a53d3d;
+  }
+  #adminEmpty {
+    color: #888;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px 0;
+  }
+  #adminStatusMsg {
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 8px;
+    min-height: 1.2em;
   }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>Boka Stugan</h1>
+  <h1 id="pageTitle">Boka Stugan</h1>
   <p class="subtitle">Välj incheckning och utcheckning i kalendern</p>
 
   <div class="calendar">
@@ -188,20 +310,30 @@
   </form>
 </div>
 
-<!-- Supabase client -->
+<div id="adminOverlay">
+  <div id="adminPanel">
+    <div class="admin-header">
+      <h2>Admin – Bokningar</h2>
+      <button id="adminCloseBtn" type="button">✕</button>
+    </div>
+    <div id="adminList"></div>
+    <div id="adminStatusMsg"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- EmailJS client -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <script>
 try {
-  // ---- CONFIG: your keys ----
   const SUPABASE_URL = 'https://tlfbnhdxbpronipyurzx.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsZmJuaGR4YnByb25pcHl1cnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNTY2NTMsImV4cCI6MjA5ODkzMjY1M30.yPPfljW8AKi27FyPPKbdkeHM25d-U-MoC3IJF_Pt_KY';
 
   const EMAILJS_SERVICE_ID = 'service_ke4ek8g';
   const EMAILJS_GUEST_TEMPLATE_ID = 'template_con95oq';
   const EMAILJS_PUBLIC_KEY = 'J2d_dlIhdcj4qNfus';
+
+  const ADMIN_CODE = 'stugan2026';
 
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -211,11 +343,10 @@ try {
   const submitBtn = document.getElementById('submitBtn');
   const selectionSummary = document.getElementById('selectionSummary');
 
-  // ---- Calendar state ----
   let calYear = new Date().getFullYear();
-  let calMonth = new Date().getMonth(); // 0-indexed
-  let allBookings = []; // [{check_in, check_out}, ...] all treated as booked
-  let selectedStart = null; // 'YYYY-MM-DD'
+  let calMonth = new Date().getMonth();
+  let allBookings = [];
+  let selectedStart = null;
   let selectedEnd = null;
 
   const monthNames = ['Januari','Februari','Mars','April','Maj','Juni','Juli','Augusti','September','Oktober','November','December'];
@@ -402,6 +533,122 @@ try {
     updateSelectionSummary();
     await loadBookings();
   });
+
+  const pageTitle = document.getElementById('pageTitle');
+  const adminOverlay = document.getElementById('adminOverlay');
+  const adminCloseBtn = document.getElementById('adminCloseBtn');
+  const adminList = document.getElementById('adminList');
+  const adminStatusMsg = document.getElementById('adminStatusMsg');
+
+  let titleTapCount = 0;
+  let titleTapTimer = null;
+
+  pageTitle.addEventListener('click', () => {
+    titleTapCount++;
+    clearTimeout(titleTapTimer);
+    titleTapTimer = setTimeout(() => { titleTapCount = 0; }, 2000);
+
+    if (titleTapCount >= 5) {
+      titleTapCount = 0;
+      clearTimeout(titleTapTimer);
+      const code = prompt('Adminkod:');
+      if (code === ADMIN_CODE) {
+        openAdminPanel();
+      } else if (code !== null) {
+        alert('Fel kod.');
+      }
+    }
+  });
+
+  function formatBookingDates(b) {
+    return `${b.check_in} → ${b.check_out}`;
+  }
+
+  async function openAdminPanel() {
+    adminOverlay.classList.add('open');
+    adminStatusMsg.textContent = '';
+    await refreshAdminList();
+  }
+
+  function closeAdminPanel() {
+    adminOverlay.classList.remove('open');
+  }
+
+  adminCloseBtn.addEventListener('click', closeAdminPanel);
+  adminOverlay.addEventListener('click', (e) => {
+    if (e.target === adminOverlay) closeAdminPanel();
+  });
+
+  async function refreshAdminList() {
+    adminList.innerHTML = '<div id="adminEmpty">Laddar…</div>';
+
+    const { data, error } = await supabaseClient
+      .from('Booking')
+      .select('*')
+      .order('check_in', { ascending: true });
+
+    if (error) {
+      adminList.innerHTML = '';
+      adminStatusMsg.textContent = 'Kunde inte hämta bokningar.';
+      console.error(error);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      adminList.innerHTML = '<div id="adminEmpty">Inga bokningar.</div>';
+      return;
+    }
+
+    adminList.innerHTML = '';
+    data.forEach(b => {
+      const row = document.createElement('div');
+      row.className = 'admin-booking';
+
+      const info = document.createElement('div');
+      info.className = 'admin-booking-info';
+      info.innerHTML = `<strong>${escapeHtml(b.name || '(namn saknas)')}</strong>${escapeHtml(b.email || '')}<br>${escapeHtml(formatBookingDates(b))}`;
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'admin-delete-btn';
+      delBtn.textContent = 'Ta bort';
+      delBtn.addEventListener('click', () => deleteBooking(b.id, delBtn));
+
+      row.appendChild(info);
+      row.appendChild(delBtn);
+      adminList.appendChild(row);
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function deleteBooking(id, btnEl) {
+    if (!confirm('Ta bort den här bokningen?')) return;
+    btnEl.disabled = true;
+    btnEl.textContent = 'Tar bort…';
+
+    const { error } = await supabaseClient
+      .from('Booking')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      adminStatusMsg.textContent = 'Kunde inte ta bort bokningen.';
+      console.error(error);
+      btnEl.disabled = false;
+      btnEl.textContent = 'Ta bort';
+      return;
+    }
+
+    adminStatusMsg.textContent = 'Bokning borttagen.';
+    await refreshAdminList();
+    await loadBookings();
+  }
+
 } catch (err) {
   console.error('HUVUDFEL:', err);
   alert('Fel: ' + err.message);

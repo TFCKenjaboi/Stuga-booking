@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Boka Stugan</title>
+
+<!-- TEMPORARY DEBUG CONSOLE - tap the floating circle button to see real errors -->
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
+
 <style>
   body {
     font-family: system-ui, -apple-system, sans-serif;
@@ -184,19 +189,12 @@
 </div>
 
 <!-- Supabase client -->
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js?v=2" crossorigin="anonymous" onerror="document.getElementById('debugBox').textContent='FEL: Supabase-biblioteket kunde inte laddas (nätverk/blockerat)'"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- EmailJS client -->
-<script src="https://unpkg.com/@emailjs/browser@3/dist/email.min.js?v=2" crossorigin="anonymous" onerror="document.getElementById('debugBox').textContent='FEL: EmailJS-biblioteket kunde inte laddas (nätverk/blockerat)'"></script>
-
-<div id="debugBox" style="max-width:480px;margin:10px auto;padding:10px;background:#fff3cd;border-radius:8px;font-size:0.75rem;color:#7a5c00;white-space:pre-wrap;"></div>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
 <script>
-  window.addEventListener('error', function(e) {
-    document.getElementById('debugBox').textContent = 'FEL: ' + e.message + ' (rad ' + e.lineno + ')';
-  });
-</script>
-
-<script>
+try {
   // ---- CONFIG: your keys ----
   const SUPABASE_URL = 'https://tlfbnhdxbpronipyurzx.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsZmJuaGR4YnByb25pcHl1cnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNTY2NTMsImV4cCI6MjA5ODkzMjY1M30.yPPfljW8AKi27FyPPKbdkeHM25d-U-MoC3IJF_Pt_KY';
@@ -205,7 +203,7 @@
   const EMAILJS_GUEST_TEMPLATE_ID = 'template_con95oq';
   const EMAILJS_PUBLIC_KEY = 'J2d_dlIhdcj4qNfus';
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   emailjs.init(EMAILJS_PUBLIC_KEY);
 
   const form = document.getElementById('bookingForm');
@@ -239,7 +237,6 @@
     });
   }
 
-  // Check if any day in [start, end) is booked -- used to block invalid selections
   function rangeHasBookedDay(startStr, endStr) {
     let d = new Date(startStr);
     const end = new Date(endStr);
@@ -275,7 +272,7 @@
     });
 
     const firstDay = new Date(calYear, calMonth, 1);
-    const startOffset = (firstDay.getDay() + 6) % 7; // Monday = 0
+    const startOffset = (firstDay.getDay() + 6) % 7;
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -310,13 +307,10 @@
 
   function handleDayClick(dateStr) {
     if (!selectedStart || (selectedStart && selectedEnd)) {
-      // start a fresh selection
       selectedStart = dateStr;
       selectedEnd = null;
     } else {
-      // picking end date
       if (dateStr <= selectedStart) {
-        // clicked before/at start again, restart
         selectedStart = dateStr;
         selectedEnd = null;
       } else if (rangeHasBookedDay(selectedStart, dateStr)) {
@@ -344,9 +338,8 @@
     renderCalendar();
   });
 
-  // Load existing bookings
   async function loadBookings() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('Booking')
       .select('*');
 
@@ -373,7 +366,6 @@
     const check_in = selectedStart;
     const check_out = selectedEnd;
 
-    // Double-check no overlap right before booking (race condition safety)
     await loadBookings();
     if (rangeHasBookedDay(check_in, check_out)) {
       statusMsg.textContent = 'Tyvärr, de valda datumen blev precis bokade. Välj andra datum.';
@@ -384,8 +376,7 @@
       return;
     }
 
-    // 1. Insert into Supabase — booked immediately, no approval step
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseClient
       .from('Booking')
       .insert([{ name, email, check_in, check_out, status: 'booked' }]);
 
@@ -396,7 +387,6 @@
       return;
     }
 
-    // 2. Send confirmation email to the guest
     try {
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_GUEST_TEMPLATE_ID, {
         name, email, check_in, check_out
@@ -412,8 +402,11 @@
     updateSelectionSummary();
     await loadBookings();
   });
+} catch (err) {
+  console.error('HUVUDFEL:', err);
+  alert('Fel: ' + err.message);
+}
 </script>
 
 </body>
 </html>
-

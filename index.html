@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oliver Holmstrand enterprise — Boka Stugan</title>
+<title>Oliver Holmstrand Enterprise — Boka Stugan</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -278,6 +278,103 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* ---------- PHOTO GALLERY ---------- */
+  .gallery {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 6px;
+    margin-top: 24px;
+    border-radius: 14px;
+    overflow: hidden;
+    height: 220px;
+  }
+  .gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .gallery a:first-child { grid-row: 1 / 3; }
+  .gallery a {
+    display: block;
+    overflow: hidden;
+  }
+  .gallery img {
+    transition: transform 0.4s ease;
+  }
+  .gallery a:hover img {
+    transform: scale(1.05);
+  }
+
+  /* ---------- REVIEWS ---------- */
+  .reviews {
+    margin-top: 28px;
+  }
+  .reviews-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 1.15rem;
+    color: var(--pine-deep);
+    text-align: center;
+    margin: 0 0 4px;
+  }
+  .reviews-sub {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    color: var(--amber-deep);
+    margin: 0 0 16px;
+  }
+  .review-card {
+    margin-top: 12px;
+    padding: 16px 18px;
+  }
+  .review-stars {
+    color: var(--amber);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .review-quote {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0 0 10px;
+    font-style: italic;
+  }
+  .review-author {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--fog);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- ABOUT ---------- */
+  .about {
+    margin-top: 32px;
+    padding: 22px 20px;
+    background: var(--pine-deep);
+    color: var(--birch-dim);
+    border-radius: 14px;
+  }
+  .about-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 1.1rem;
+    color: var(--birch);
+    margin: 0 0 10px;
+  }
+  .about p {
+    font-size: 0.87rem;
+    line-height: 1.65;
+    margin: 0 0 10px;
+    color: var(--birch-dim);
+    opacity: 0.9;
+  }
+  .about p:last-child { margin-bottom: 0; }
+
   footer.sign {
     text-align: center;
     margin-top: 36px;
@@ -397,12 +494,24 @@
       <line x1="0" y1="79" x2="360" y2="79" stroke="currentColor" stroke-width="1" opacity="0.3"/>
     </svg>
     <p class="eyebrow">Est. i granskogen</p>
-    <h1 id="pageTitle">Oliver Holmstrand Enterprisen</h1>
+    <h1 id="pageTitle">Oliver Holmstrand Enterprise</h1>
     <p class="subtitle">En liten stuga vid skogsbrynet utanför Harads — tyst, mörk och nära Lule älv. Hit kommer man för norrsken, tystnad och avstånd till allt annat.</p>
     <span class="location-tag">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
       Harads, Norrbotten
     </span>
+  </div>
+
+  <div class="gallery">
+    <a href="https://www.pexels.com/photo/northern-lights-over-mountain-and-forest-4388593/" target="_blank" rel="noopener">
+      <img src="https://images.pexels.com/photos/4388593/pexels-photo-4388593.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Norrsken över sjö och skog" loading="lazy">
+    </a>
+    <a href="https://www.pexels.com/photo/white-snowy-environment-with-pine-trees-773953/" target="_blank" rel="noopener">
+      <img src="https://images.pexels.com/photos/773953/pexels-photo-773953.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Dimmig tallskog i snö" loading="lazy">
+    </a>
+    <a href="https://www.pexels.com/photo/a-log-cabin-house-on-a-snowy-land-in-the-forest-7161537/" target="_blank" rel="noopener">
+      <img src="https://images.pexels.com/photos/7161537/pexels-photo-7161537.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Stuga i snötäckt skog uppifrån" loading="lazy">
+    </a>
   </div>
 
   <div class="calendar card">
@@ -431,7 +540,36 @@
     <div id="statusMsg"></div>
   </form>
 
-  <footer class="sign">Oliver Holmstrand Enterprisen · Harads</footer>
+  <div class="reviews">
+    <p class="reviews-title">Vad gästerna säger</p>
+    <p class="reviews-sub">★★★★★ · Snitt 5,0 av 5</p>
+
+    <div class="review-card card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-quote">"Ingen wifi, inga bekymmer. Kom hem med noll steg på klockan och noll koll på vad som hänt i världen. 10/10, kan rekommendera för alla som behöver försvinna ett tag."</p>
+      <div class="review-author">— Fredrik, Luleå</div>
+    </div>
+
+    <div class="review-card card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-quote">"Elden i öppna spisen var mer pålitlig än de flesta relationer jag haft. Norrskenet natt två var bara grädden på moset."</p>
+      <div class="review-author">— Sanna, Umeå</div>
+    </div>
+
+    <div class="review-card card">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-quote">"Åkte dit för lugn och ro, blev sittande och prata med en älg i tre minuter innan den bestämde sig för att den hade viktigare saker för sig. Bättre socialt liv än mitt eget."</p>
+      <div class="review-author">— Johan & Lisa, Stockholm</div>
+    </div>
+  </div>
+
+  <div class="about">
+    <p class="about-title">Om Oliver Holmstrand Enterprise</p>
+    <p>Namnet låter större än verksamheten. Oliver Holmstrand Enterprise är i praktiken en enda stuga, utanför Harads, som Oliver ärvde av sin farfar och sakta rustade upp helger i taget.</p>
+    <p>"Enterprise" är kanske väl tilltaget för en stuga och en bokningssida — men det är precis lika seriöst som stugan förtjänar: sköts med omtanke, bokas enkelt, och byggd för att man ska kunna koppla av utan krångel.</p>
+  </div>
+
+  <footer class="sign">Oliver Holmstrand Enterprise · Harads</footer>
 </div>
 
 <div id="adminOverlay">

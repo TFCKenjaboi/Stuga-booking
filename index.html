@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boka Stugan</title>
+<style>
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #f4f1ec;
+    color: #2b2b2b;
+    margin: 0;
+    padding: 20px;
+  }
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+  }
+  p.subtitle {
+    color: #666;
+    margin-top: 0;
+    margin-bottom: 24px;
+  }
+  form {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 14px;
+    margin-bottom: 4px;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: #3a6351;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:disabled {
+    background: #999;
+  }
+  #statusMsg {
+    margin-top: 14px;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .bookings-list {
+    margin-top: 30px;
+  }
+  .bookings-list h2 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  .booking-item {
+    background: white;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .status-pending { color: #b8860b; }
+  .status-approved { color: #2e7d32; }
+  .status-denied { color: #c62828; }
+
+  .calendar {
+    margin-top: 30px;
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  .cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .cal-header button {
+    width: auto;
+    padding: 6px 12px;
+    margin: 0;
+    background: #3a6351;
+  }
+  .cal-header span {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+  }
+  .cal-daylabel {
+    font-size: 0.7rem;
+    color: #888;
+    font-weight: 600;
+    padding: 4px 0;
+  }
+  .cal-day {
+    padding: 8px 0;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
+  .cal-day.empty { background: none; }
+  .cal-day.available { background: #e6f2e9; color: #2e7d32; }
+  .cal-day.pending { background: #fdf3d8; color: #8a6d00; }
+  .cal-day.booked { background: #fbe1e1; color: #a52424; }
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-top: 12px;
+    font-size: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .legend span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot.available { background: #6bbf8b; }
+  .dot.pending { background: #e8c547; }
+  .dot.booked { background: #d16a6a; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Boka Stugan</h1>
+  <p class="subtitle">Fyll i dina uppgifter för att skicka en bokningsförfrågan</p>
+
+  <form id="bookingForm">
+    <label for="name">Namn</label>
+    <input type="text" id="name" required>
+
+    <label for="email">E-post</label>
+    <input type="email" id="email" required>
+
+    <label for="check_in">Incheckning</label>
+    <input type="date" id="check_in" required>
+
+    <label for="check_out">Utcheckning</label>
+    <input type="date" id="check_out" required>
+
+    <button type="submit" id="submitBtn">Skicka bokningsförfrågan</button>
+    <div id="statusMsg"></div>
+  </form>
+
+  <div class="calendar">
+    <div class="cal-header">
+      <button id="prevMonth" type="button">←</button>
+      <span id="calMonthLabel"></span>
+      <button id="nextMonth" type="button">→</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="legend">
+      <span><i class="dot available"></i> Ledigt</span>
+      <span><i class="dot pending"></i> Väntar godkännande</span>
+      <span><i class="dot booked"></i> Bokat</span>
+    </div>
+  </div>
+
+  <div class="bookings-list">
+    <h2>Bokade datum</h2>
+    <div id="bookingsList">Laddar...</div>
+  </div>
+</div>
+
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- EmailJS client -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<script>
+  // ---- CONFIG: your keys ----
+  const SUPABASE_URL = 'https://tlfbnhdxbpronipyurzx.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsZmJuaGR4YnByb25pcHl1cnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNTY2NTMsImV4cCI6MjA5ODkzMjY1M30.yPPfljW8AKi27FyPPKbdkeHM25d-U-MoC3IJF_Pt_KY';
+
+  const EMAILJS_SERVICE_ID = 'service_ke4ek8g';
+  const EMAILJS_TEMPLATE_ID = 'template_29lqp6c';
+  const EMAILJS_PUBLIC_KEY = 'J2d_dlIhdcj4qNfus';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  const form = document.getElementById('bookingForm');
+  const statusMsg = document.getElementById('statusMsg');
+  const submitBtn = document.getElementById('submitBtn');
+  const bookingsList = document.getElementById('bookingsList');
+
+  // ---- Calendar state ----
+  let calYear = new Date().getFullYear();
+  let calMonth = new Date().getMonth(); // 0-indexed
+  let allBookings = [];
+
+  const monthNames = ['Januari','Februari','Mars','April','Maj','Juni','Juli','Augusti','September','Oktober','November','December'];
+  const dayLabels = ['Mån','Tis','Ons','Tor','Fre','Lör','Sön'];
+
+  function dateToStr(d) {
+    return d.toISOString().split('T')[0];
+  }
+
+  // For a given date string 'YYYY-MM-DD', find status: booked (approved), pending, or available
+  function getStatusForDate(dateStr) {
+    const d = new Date(dateStr);
+    for (const b of allBookings) {
+      const start = new Date(b.check_in);
+      const end = new Date(b.check_out);
+      if (d >= start && d < end) {
+        return b.status === 'approved' ? 'booked' : 'pending';
+      }
+    }
+    return 'available';
+  }
+
+  function renderCalendar() {
+    const calGrid = document.getElementById('calGrid');
+    const calMonthLabel = document.getElementById('calMonthLabel');
+    calMonthLabel.textContent = `${monthNames[calMonth]} ${calYear}`;
+
+    calGrid.innerHTML = '';
+    dayLabels.forEach(label => {
+      const el = document.createElement('div');
+      el.className = 'cal-daylabel';
+      el.textContent = label;
+      calGrid.appendChild(el);
+    });
+
+    const firstDay = new Date(calYear, calMonth, 1);
+    const startOffset = (firstDay.getDay() + 6) % 7; // make Monday = 0
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+    for (let i = 0; i < startOffset; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      calGrid.appendChild(empty);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateObj = new Date(calYear, calMonth, day);
+      const dateStr = dateToStr(dateObj);
+      const status = getStatusForDate(dateStr);
+
+      const el = document.createElement('div');
+      el.className = `cal-day ${status}`;
+      el.textContent = day;
+      calGrid.appendChild(el);
+    }
+  }
+
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  });
+
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  });
+
+  // Load existing bookings
+  async function loadBookings() {
+    const { data, error } = await supabase
+      .from('Booking')
+      .select('*')
+      .order('check_in', { ascending: true });
+
+    if (error) {
+      bookingsList.innerHTML = 'Kunde inte ladda bokningar.';
+      console.error(error);
+      return;
+    }
+
+    allBookings = data || [];
+    renderCalendar();
+
+    if (!data || data.length === 0) {
+      bookingsList.innerHTML = '<p>Inga bokningar ännu.</p>';
+      return;
+    }
+
+    bookingsList.innerHTML = data.map(b => `
+      <div class="booking-item">
+        ${b.check_in} → ${b.check_out}
+        — <span class="status-${b.status}">${b.status}</span>
+      </div>
+    `).join('');
+  }
+
+  loadBookings();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    statusMsg.textContent = 'Skickar...';
+
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const check_in = document.getElementById('check_in').value;
+    const check_out = document.getElementById('check_out').value;
+
+    if (new Date(check_out) <= new Date(check_in)) {
+      statusMsg.textContent = 'Utcheckning måste vara efter incheckning.';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    // 1. Insert into Supabase
+    const { error: dbError } = await supabase
+      .from('Booking')
+      .insert([{ name, email, check_in, check_out, status: 'pending' }]);
+
+    if (dbError) {
+      console.error(dbError);
+      statusMsg.textContent = 'Något gick fel. Försök igen.';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    // 2. Send notification email via EmailJS
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        name, email, check_in, check_out
+      });
+    } catch (emailErr) {
+      console.error('Email misslyckades:', emailErr);
+      // Booking still saved even if email fails
+    }
+
+    statusMsg.textContent = 'Bokningsförfrågan skickad! Du hör av oss snart.';
+    form.reset();
+    submitBtn.disabled = false;
+    loadBookings();
+  });
+</script>
+
+</body>
+</html>

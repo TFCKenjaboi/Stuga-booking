@@ -25,68 +25,7 @@
     margin-top: 0;
     margin-bottom: 24px;
   }
-  form {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  }
-  label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-top: 14px;
-    margin-bottom: 4px;
-  }
-  input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-    box-sizing: border-box;
-  }
-  button {
-    width: 100%;
-    margin-top: 20px;
-    padding: 12px;
-    background: #3a6351;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  button:disabled {
-    background: #999;
-  }
-  #statusMsg {
-    margin-top: 14px;
-    font-size: 0.9rem;
-    text-align: center;
-  }
-  .bookings-list {
-    margin-top: 30px;
-  }
-  .bookings-list h2 {
-    font-size: 1.1rem;
-    margin-bottom: 10px;
-  }
-  .booking-item {
-    background: white;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  }
-  .status-pending { color: #b8860b; }
-  .status-approved { color: #2e7d32; }
-  .status-denied { color: #c62828; }
-
   .calendar {
-    margin-top: 30px;
     background: white;
     border-radius: 12px;
     padding: 16px;
@@ -103,6 +42,11 @@
     padding: 6px 12px;
     margin: 0;
     background: #3a6351;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
   }
   .cal-header span {
     font-weight: 600;
@@ -124,11 +68,14 @@
     padding: 8px 0;
     border-radius: 6px;
     font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
   }
-  .cal-day.empty { background: none; }
+  .cal-day.empty { cursor: default; }
+  .cal-day.past { color: #ccc; cursor: default; }
   .cal-day.available { background: #e6f2e9; color: #2e7d32; }
-  .cal-day.pending { background: #fdf3d8; color: #8a6d00; }
-  .cal-day.booked { background: #fbe1e1; color: #a52424; }
+  .cal-day.booked { background: #fbe1e1; color: #a52424; cursor: not-allowed; }
+  .cal-day.selected { background: #3a6351; color: white; font-weight: 600; }
   .legend {
     display: flex;
     gap: 14px;
@@ -148,36 +95,58 @@
     display: inline-block;
   }
   .dot.available { background: #6bbf8b; }
-  .dot.pending { background: #e8c547; }
   .dot.booked { background: #d16a6a; }
+  .dot.selected { background: #3a6351; }
 
-  .hidden { display: none; }
+  #selectionSummary {
+    margin-top: 14px;
+    font-size: 0.9rem;
+    text-align: center;
+    color: #444;
+  }
 
-  #signinBox {
+  form {
     background: white;
     border-radius: 12px;
     padding: 20px;
+    margin-top: 20px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    text-align: center;
   }
-  #signinBox p {
-    color: #666;
-    font-size: 0.9rem;
-  }
-  #signedInBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  label {
+    display: block;
     font-size: 0.85rem;
-    margin-bottom: 14px;
-    color: #444;
+    font-weight: 600;
+    margin-top: 14px;
+    margin-bottom: 4px;
   }
-  #signedInBar button {
-    width: auto;
-    margin: 0;
-    padding: 6px 12px;
-    font-size: 0.8rem;
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  button[type="submit"] {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: #3a6351;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:disabled {
     background: #999;
+    cursor: not-allowed;
+  }
+  #statusMsg {
+    margin-top: 14px;
+    font-size: 0.9rem;
+    text-align: center;
   }
 </style>
 </head>
@@ -185,33 +154,7 @@
 
 <div class="container">
   <h1>Boka Stugan</h1>
-  <p class="subtitle">Fyll i dina uppgifter för att skicka en bokningsförfrågan</p>
-
-  <div id="signinBox">
-    <p>Logga in med din e-post för att boka stugan.</p>
-    <input type="email" id="signinEmail" placeholder="din@email.com" required>
-    <button id="signinBtn" type="button">Skicka inloggningslänk</button>
-    <div id="signinStatus" style="margin-top:10px; font-size:0.85rem;"></div>
-  </div>
-
-  <div id="signedInBar" class="hidden">
-    <span id="signedInEmail"></span>
-    <button id="signOutBtn" type="button">Logga ut</button>
-  </div>
-
-  <form id="bookingForm" class="hidden">
-    <label for="name">Namn</label>
-    <input type="text" id="name" required>
-
-    <label for="check_in">Incheckning</label>
-    <input type="date" id="check_in" required>
-
-    <label for="check_out">Utcheckning</label>
-    <input type="date" id="check_out" required>
-
-    <button type="submit" id="submitBtn">Skicka bokningsförfrågan</button>
-    <div id="statusMsg"></div>
-  </form>
+  <p class="subtitle">Välj incheckning och utcheckning i kalendern</p>
 
   <div class="calendar">
     <div class="cal-header">
@@ -222,15 +165,22 @@
     <div class="cal-grid" id="calGrid"></div>
     <div class="legend">
       <span><i class="dot available"></i> Ledigt</span>
-      <span><i class="dot pending"></i> Väntar godkännande</span>
+      <span><i class="dot selected"></i> Valt</span>
       <span><i class="dot booked"></i> Bokat</span>
     </div>
+    <div id="selectionSummary">Tryck på ett datum för incheckning</div>
   </div>
 
-  <div class="bookings-list">
-    <h2>Bokade datum</h2>
-    <div id="bookingsList">Laddar...</div>
-  </div>
+  <form id="bookingForm">
+    <label for="name">Namn</label>
+    <input type="text" id="name" required>
+
+    <label for="email">E-post</label>
+    <input type="email" id="email" required>
+
+    <button type="submit" id="submitBtn" disabled>Boka</button>
+    <div id="statusMsg"></div>
+  </form>
 </div>
 
 <!-- Supabase client -->
@@ -244,7 +194,6 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsZmJuaGR4YnByb25pcHl1cnp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNTY2NTMsImV4cCI6MjA5ODkzMjY1M30.yPPfljW8AKi27FyPPKbdkeHM25d-U-MoC3IJF_Pt_KY';
 
   const EMAILJS_SERVICE_ID = 'service_ke4ek8g';
-  const EMAILJS_TEMPLATE_ID = 'template_29lqp6c';
   const EMAILJS_GUEST_TEMPLATE_ID = 'template_con95oq';
   const EMAILJS_PUBLIC_KEY = 'J2d_dlIhdcj4qNfus';
 
@@ -254,97 +203,54 @@
   const form = document.getElementById('bookingForm');
   const statusMsg = document.getElementById('statusMsg');
   const submitBtn = document.getElementById('submitBtn');
-  const bookingsList = document.getElementById('bookingsList');
-
-  const signinBox = document.getElementById('signinBox');
-  const signinEmail = document.getElementById('signinEmail');
-  const signinBtn = document.getElementById('signinBtn');
-  const signinStatus = document.getElementById('signinStatus');
-  const signedInBar = document.getElementById('signedInBar');
-  const signedInEmail = document.getElementById('signedInEmail');
-  const signOutBtn = document.getElementById('signOutBtn');
-
-  let currentUserEmail = null;
-
-  function showSignedInUI(email) {
-    currentUserEmail = email;
-    signinBox.classList.add('hidden');
-    signedInBar.classList.remove('hidden');
-    form.classList.remove('hidden');
-    signedInEmail.textContent = `Inloggad som ${email}`;
-  }
-
-  function showSignedOutUI() {
-    currentUserEmail = null;
-    signinBox.classList.remove('hidden');
-    signedInBar.classList.add('hidden');
-    form.classList.add('hidden');
-  }
-
-  // Check existing session on load
-  supabase.auth.getSession().then(({ data }) => {
-    if (data.session && data.session.user.email) {
-      showSignedInUI(data.session.user.email);
-    }
-  });
-
-  // React to auth changes (e.g. after clicking magic link)
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (session && session.user.email) {
-      showSignedInUI(session.user.email);
-    } else {
-      showSignedOutUI();
-    }
-  });
-
-  signinBtn.addEventListener('click', async () => {
-    const email = signinEmail.value.trim();
-    if (!email) return;
-    signinBtn.disabled = true;
-    signinStatus.textContent = 'Skickar länk...';
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.href }
-    });
-
-    if (error) {
-      console.error(error);
-      signinStatus.textContent = 'Något gick fel. Försök igen.';
-    } else {
-      signinStatus.textContent = 'Kolla din e-post för en inloggningslänk!';
-    }
-    signinBtn.disabled = false;
-  });
-
-  signOutBtn.addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    showSignedOutUI();
-  });
+  const selectionSummary = document.getElementById('selectionSummary');
 
   // ---- Calendar state ----
   let calYear = new Date().getFullYear();
   let calMonth = new Date().getMonth(); // 0-indexed
-  let allBookings = [];
+  let allBookings = []; // [{check_in, check_out}, ...] all treated as booked
+  let selectedStart = null; // 'YYYY-MM-DD'
+  let selectedEnd = null;
 
   const monthNames = ['Januari','Februari','Mars','April','Maj','Juni','Juli','Augusti','September','Oktober','November','December'];
   const dayLabels = ['Mån','Tis','Ons','Tor','Fre','Lör','Sön'];
 
   function dateToStr(d) {
-    return d.toISOString().split('T')[0];
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
 
-  // For a given date string 'YYYY-MM-DD', find status: booked (approved), pending, or available
-  function getStatusForDate(dateStr) {
+  function isDateBooked(dateStr) {
     const d = new Date(dateStr);
-    for (const b of allBookings) {
+    return allBookings.some(b => {
       const start = new Date(b.check_in);
       const end = new Date(b.check_out);
-      if (d >= start && d < end) {
-        return b.status === 'approved' ? 'booked' : 'pending';
-      }
+      return d >= start && d < end;
+    });
+  }
+
+  // Check if any day in [start, end) is booked -- used to block invalid selections
+  function rangeHasBookedDay(startStr, endStr) {
+    let d = new Date(startStr);
+    const end = new Date(endStr);
+    while (d < end) {
+      if (isDateBooked(dateToStr(d))) return true;
+      d.setDate(d.getDate() + 1);
     }
-    return 'available';
+    return false;
+  }
+
+  function updateSelectionSummary() {
+    if (!selectedStart) {
+      selectionSummary.textContent = 'Tryck på ett datum för incheckning';
+    } else if (selectedStart && !selectedEnd) {
+      selectionSummary.textContent = `Incheckning: ${selectedStart} — tryck på utcheckningsdatum`;
+    } else {
+      selectionSummary.textContent = `${selectedStart} → ${selectedEnd}`;
+    }
+    submitBtn.disabled = !(selectedStart && selectedEnd);
   }
 
   function renderCalendar() {
@@ -361,8 +267,10 @@
     });
 
     const firstDay = new Date(calYear, calMonth, 1);
-    const startOffset = (firstDay.getDay() + 6) % 7; // make Monday = 0
+    const startOffset = (firstDay.getDay() + 6) % 7; // Monday = 0
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const today = new Date();
+    today.setHours(0,0,0,0);
 
     for (let i = 0; i < startOffset; i++) {
       const empty = document.createElement('div');
@@ -373,13 +281,47 @@
     for (let day = 1; day <= daysInMonth; day++) {
       const dateObj = new Date(calYear, calMonth, day);
       const dateStr = dateToStr(dateObj);
-      const status = getStatusForDate(dateStr);
-
       const el = document.createElement('div');
-      el.className = `cal-day ${status}`;
       el.textContent = day;
+
+      if (dateObj < today) {
+        el.className = 'cal-day past';
+      } else if (isDateBooked(dateStr)) {
+        el.className = 'cal-day booked';
+      } else {
+        const inSelectedRange = selectedStart && selectedEnd &&
+          dateStr >= selectedStart && dateStr <= selectedEnd;
+        const isEndpoint = dateStr === selectedStart || dateStr === selectedEnd;
+        el.className = 'cal-day available' + (inSelectedRange || isEndpoint ? ' selected' : '');
+        el.addEventListener('click', () => handleDayClick(dateStr));
+      }
+
       calGrid.appendChild(el);
     }
+  }
+
+  function handleDayClick(dateStr) {
+    if (!selectedStart || (selectedStart && selectedEnd)) {
+      // start a fresh selection
+      selectedStart = dateStr;
+      selectedEnd = null;
+    } else {
+      // picking end date
+      if (dateStr <= selectedStart) {
+        // clicked before/at start again, restart
+        selectedStart = dateStr;
+        selectedEnd = null;
+      } else if (rangeHasBookedDay(selectedStart, dateStr)) {
+        statusMsg.textContent = 'Det finns en bokning mellan dessa datum. Välj andra datum.';
+        selectedStart = dateStr;
+        selectedEnd = null;
+      } else {
+        selectedEnd = dateStr;
+        statusMsg.textContent = '';
+      }
+    }
+    updateSelectionSummary();
+    renderCalendar();
   }
 
   document.getElementById('prevMonth').addEventListener('click', () => {
@@ -398,58 +340,46 @@
   async function loadBookings() {
     const { data, error } = await supabase
       .from('Booking')
-      .select('*')
-      .order('check_in', { ascending: true });
+      .select('*');
 
     if (error) {
-      bookingsList.innerHTML = 'Kunde inte ladda bokningar.';
       console.error(error);
       return;
     }
 
     allBookings = data || [];
     renderCalendar();
-
-    if (!data || data.length === 0) {
-      bookingsList.innerHTML = '<p>Inga bokningar ännu.</p>';
-      return;
-    }
-
-    bookingsList.innerHTML = data.map(b => `
-      <div class="booking-item">
-        ${b.check_in} → ${b.check_out}
-        — <span class="status-${b.status}">${b.status}</span>
-      </div>
-    `).join('');
   }
 
   loadBookings();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!currentUserEmail) {
-      statusMsg.textContent = 'Du måste logga in först.';
-      return;
-    }
+    if (!selectedStart || !selectedEnd) return;
 
     submitBtn.disabled = true;
-    statusMsg.textContent = 'Skickar...';
+    statusMsg.textContent = 'Bokar...';
 
     const name = document.getElementById('name').value;
-    const email = currentUserEmail;
-    const check_in = document.getElementById('check_in').value;
-    const check_out = document.getElementById('check_out').value;
+    const email = document.getElementById('email').value;
+    const check_in = selectedStart;
+    const check_out = selectedEnd;
 
-    if (new Date(check_out) <= new Date(check_in)) {
-      statusMsg.textContent = 'Utcheckning måste vara efter incheckning.';
-      submitBtn.disabled = false;
+    // Double-check no overlap right before booking (race condition safety)
+    await loadBookings();
+    if (rangeHasBookedDay(check_in, check_out)) {
+      statusMsg.textContent = 'Tyvärr, de valda datumen blev precis bokade. Välj andra datum.';
+      selectedStart = null;
+      selectedEnd = null;
+      updateSelectionSummary();
+      renderCalendar();
       return;
     }
 
-    // 1. Insert into Supabase
+    // 1. Insert into Supabase — booked immediately, no approval step
     const { error: dbError } = await supabase
       .from('Booking')
-      .insert([{ name, email, check_in, check_out, status: 'pending' }]);
+      .insert([{ name, email, check_in, check_out, status: 'booked' }]);
 
     if (dbError) {
       console.error(dbError);
@@ -458,16 +388,7 @@
       return;
     }
 
-    // 2. Send notification email to owner
-    try {
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        name, email, check_in, check_out
-      });
-    } catch (emailErr) {
-      console.error('Ägar-email misslyckades:', emailErr);
-    }
-
-    // 3. Send confirmation email to the guest
+    // 2. Send confirmation email to the guest
     try {
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_GUEST_TEMPLATE_ID, {
         name, email, check_in, check_out
@@ -476,10 +397,12 @@
       console.error('Gäst-email misslyckades:', emailErr);
     }
 
-    statusMsg.textContent = 'Bokningsförfrågan skickad! Du hör av oss snart.';
+    statusMsg.textContent = 'Din bokning är klar! En bekräftelse har skickats till din e-post.';
     form.reset();
-    submitBtn.disabled = false;
-    loadBookings();
+    selectedStart = null;
+    selectedEnd = null;
+    updateSelectionSummary();
+    await loadBookings();
   });
 </script>
 

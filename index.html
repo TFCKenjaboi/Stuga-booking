@@ -612,7 +612,7 @@ try {
       delBtn.type = 'button';
       delBtn.className = 'admin-delete-btn';
       delBtn.textContent = 'Ta bort';
-      delBtn.addEventListener('click', () => deleteBooking(b.id, delBtn));
+      delBtn.addEventListener('click', () => deleteBooking(b, delBtn));
 
       row.appendChild(info);
       row.appendChild(delBtn);
@@ -626,27 +626,43 @@ try {
     return div.innerHTML;
   }
 
-  async function deleteBooking(id, btnEl) {
+  const DELETE_BOOKING_URL = `${SUPABASE_URL}/functions/v1/delete-booking`;
+
+  async function deleteBooking(booking, btnEl) {
     if (!confirm('Ta bort den här bokningen?')) return;
     btnEl.disabled = true;
     btnEl.textContent = 'Tar bort…';
 
-    const { error } = await supabaseClient
-      .from('Booking')
-      .delete()
-      .eq('id', id);
+    try {
+      const res = await fetch(DELETE_BOOKING_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-secret': ADMIN_CODE
+        },
+        body: JSON.stringify({
+          email: booking.email,
+          check_in: booking.check_in,
+          check_out: booking.check_out
+        })
+      });
 
-    if (error) {
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || 'Okänt fel');
+      }
+
+      adminStatusMsg.textContent = 'Bokning borttagen.';
+      await refreshAdminList();
+      await loadBookings();
+    } catch (err) {
       adminStatusMsg.textContent = 'Kunde inte ta bort bokningen.';
-      console.error(error);
+      console.error(err);
+    } finally {
       btnEl.disabled = false;
       btnEl.textContent = 'Ta bort';
-      return;
     }
-
-    adminStatusMsg.textContent = 'Bokning borttagen.';
-    await refreshAdminList();
-    await loadBookings();
   }
 
 } catch (err) {

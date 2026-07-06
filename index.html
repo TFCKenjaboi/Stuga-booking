@@ -639,6 +639,7 @@ try {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY,
           'x-admin-secret': ADMIN_CODE
         },
         body: JSON.stringify({

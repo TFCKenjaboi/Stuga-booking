@@ -150,6 +150,35 @@
   .dot.available { background: #6bbf8b; }
   .dot.pending { background: #e8c547; }
   .dot.booked { background: #d16a6a; }
+
+  .hidden { display: none; }
+
+  #signinBox {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  #signinBox p {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  #signedInBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+    color: #444;
+  }
+  #signedInBar button {
+    width: auto;
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    background: #999;
+  }
 </style>
 </head>
 <body>
@@ -158,12 +187,21 @@
   <h1>Boka Stugan</h1>
   <p class="subtitle">Fyll i dina uppgifter för att skicka en bokningsförfrågan</p>
 
-  <form id="bookingForm">
+  <div id="signinBox">
+    <p>Logga in med din e-post för att boka stugan.</p>
+    <input type="email" id="signinEmail" placeholder="din@email.com" required>
+    <button id="signinBtn" type="button">Skicka inloggningslänk</button>
+    <div id="signinStatus" style="margin-top:10px; font-size:0.85rem;"></div>
+  </div>
+
+  <div id="signedInBar" class="hidden">
+    <span id="signedInEmail"></span>
+    <button id="signOutBtn" type="button">Logga ut</button>
+  </div>
+
+  <form id="bookingForm" class="hidden">
     <label for="name">Namn</label>
     <input type="text" id="name" required>
-
-    <label for="email">E-post</label>
-    <input type="email" id="email" required>
 
     <label for="check_in">Incheckning</label>
     <input type="date" id="check_in" required>
@@ -207,6 +245,7 @@
 
   const EMAILJS_SERVICE_ID = 'service_ke4ek8g';
   const EMAILJS_TEMPLATE_ID = 'template_29lqp6c';
+  const EMAILJS_GUEST_TEMPLATE_ID = 'template_con95oq';
   const EMAILJS_PUBLIC_KEY = 'J2d_dlIhdcj4qNfus';
 
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -216,6 +255,72 @@
   const statusMsg = document.getElementById('statusMsg');
   const submitBtn = document.getElementById('submitBtn');
   const bookingsList = document.getElementById('bookingsList');
+
+  const signinBox = document.getElementById('signinBox');
+  const signinEmail = document.getElementById('signinEmail');
+  const signinBtn = document.getElementById('signinBtn');
+  const signinStatus = document.getElementById('signinStatus');
+  const signedInBar = document.getElementById('signedInBar');
+  const signedInEmail = document.getElementById('signedInEmail');
+  const signOutBtn = document.getElementById('signOutBtn');
+
+  let currentUserEmail = null;
+
+  function showSignedInUI(email) {
+    currentUserEmail = email;
+    signinBox.classList.add('hidden');
+    signedInBar.classList.remove('hidden');
+    form.classList.remove('hidden');
+    signedInEmail.textContent = `Inloggad som ${email}`;
+  }
+
+  function showSignedOutUI() {
+    currentUserEmail = null;
+    signinBox.classList.remove('hidden');
+    signedInBar.classList.add('hidden');
+    form.classList.add('hidden');
+  }
+
+  // Check existing session on load
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session && data.session.user.email) {
+      showSignedInUI(data.session.user.email);
+    }
+  });
+
+  // React to auth changes (e.g. after clicking magic link)
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (session && session.user.email) {
+      showSignedInUI(session.user.email);
+    } else {
+      showSignedOutUI();
+    }
+  });
+
+  signinBtn.addEventListener('click', async () => {
+    const email = signinEmail.value.trim();
+    if (!email) return;
+    signinBtn.disabled = true;
+    signinStatus.textContent = 'Skickar länk...';
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.href }
+    });
+
+    if (error) {
+      console.error(error);
+      signinStatus.textContent = 'Något gick fel. Försök igen.';
+    } else {
+      signinStatus.textContent = 'Kolla din e-post för en inloggningslänk!';
+    }
+    signinBtn.disabled = false;
+  });
+
+  signOutBtn.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    showSignedOutUI();
+  });
 
   // ---- Calendar state ----
   let calYear = new Date().getFullYear();
@@ -322,11 +427,16 @@
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!currentUserEmail) {
+      statusMsg.textContent = 'Du måste logga in först.';
+      return;
+    }
+
     submitBtn.disabled = true;
     statusMsg.textContent = 'Skickar...';
 
     const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
+    const email = currentUserEmail;
     const check_in = document.getElementById('check_in').value;
     const check_out = document.getElementById('check_out').value;
 
@@ -348,14 +458,22 @@
       return;
     }
 
-    // 2. Send notification email via EmailJS
+    // 2. Send notification email to owner
     try {
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         name, email, check_in, check_out
       });
     } catch (emailErr) {
-      console.error('Email misslyckades:', emailErr);
-      // Booking still saved even if email fails
+      console.error('Ägar-email misslyckades:', emailErr);
+    }
+
+    // 3. Send confirmation email to the guest
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_GUEST_TEMPLATE_ID, {
+        name, email, check_in, check_out
+      });
+    } catch (emailErr) {
+      console.error('Gäst-email misslyckades:', emailErr);
     }
 
     statusMsg.textContent = 'Bokningsförfrågan skickad! Du hör av oss snart.';
